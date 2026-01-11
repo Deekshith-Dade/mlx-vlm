@@ -1,0 +1,43 @@
+Screen {
+    layout: grid;
+    grid-size: 1 2;
+    grid-rows: 1fr 3;
+}
+
+
+
+#chat-view {
+    height: 100%;
+    width: 100%;
+    overflow-y: scroll;
+    padding: 1 0 0 1;
+    scrollbar-size: 1 1;
+}
+
+.input-area {
+    dock: bottom;
+    margin: 1 0;
+    width: 100%;
+    border: solid red;
+}
+
+.message {
+    padding: 1;
+    margin: 1 0;
+    background: $panel;
+    color: $text;
+}
+
+.message-user {
+    text-align: right;
+    background: $accent;
+    color: $text;
+}
+
+MessageInfo {
+    height: auto;
+    background: $surface;
+    color: $text-muted;
+    border: dashed $primary-darken-2;
+    text-style: italic;
+}
