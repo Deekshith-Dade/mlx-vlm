@@ -1220,6 +1220,7 @@ def main():
     num_audios = (
         1 if args.audio is not None else 0
     )  # TODO: Support multiple audio files
+    breakpoint()
     prompt = apply_chat_template(
         processor, config, prompt, num_images=num_images, num_audios=num_audios
     )

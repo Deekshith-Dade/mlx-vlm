@@ -1,37 +1,40 @@
 Screen {
     layout: grid;
     grid-size: 1 2;
-    grid-rows: 1fr 3;
+    grid-rows: 1fr 1;
+    layers: base overlay;
 }
-
-
 
 #chat-view {
     height: 100%;
     width: 100%;
     overflow-y: scroll;
-    padding: 1 0 0 1;
+    padding: 0 0 0 0;
     scrollbar-size: 1 1;
 }
 
-.input-area {
+#input-area {
     dock: bottom;
-    margin: 1 0;
+    margin: 0 0 2 0;
     width: 100%;
-    border: solid red;
+    height: auto;
 }
 
 .message {
-    padding: 1;
-    margin: 1 0;
+    padding: 1 0 0 1;
+    margin: 1 0 0 0;
     background: $panel;
     color: $text;
 }
 
 .message-user {
     text-align: right;
-    background: $accent;
+    background: $primary;
     color: $text;
+}
+
+.loading {
+    background: red;
 }
 
 MessageInfo {
@@ -41,3 +44,15 @@ MessageInfo {
     border: dashed $primary-darken-2;
     text-style: italic;
 }
+
+
+Throbber {
+    layer: overlay;
+    dock: top;
+    width: 100%;
+    height: 1;
+    visibility: hidden;
+    &.-busy {
+        visibility: visible;
+    }    
+} 

@@ -76,6 +76,7 @@ class MLXVisionChat:
         if self.current_image is None:
             return "Please load an image first using the /image command."
 
+        breakpoint()
         messages = []
         for i, message in enumerate(self.history):
             skip_token = True
