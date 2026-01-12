@@ -3,6 +3,7 @@ Screen {
     grid-size: 1 2;
     grid-rows: 1fr 1;
     layers: base overlay;
+    background: #000000;
 }
 
 #chat-view {
@@ -11,6 +12,7 @@ Screen {
     overflow-y: scroll;
     padding: 0 0 0 0;
     scrollbar-size: 1 1;
+    background: #000000;
 }
 
 #input-area {
@@ -18,33 +20,33 @@ Screen {
     margin: 0 0 2 0;
     width: 100%;
     height: auto;
+    background: #000000;
 }
 
 .message {
     padding: 1 0 0 1;
     margin: 1 0 0 0;
-    background: $panel;
-    color: $text;
+    background: #0a0a0a;
+    color: #e0e0e0;
 }
 
 .message-user {
     text-align: right;
-    background: $primary;
-    color: $text;
+    background: #1a1a1a;
+    color: #ffffff;
 }
 
 .loading {
-    background: red;
+    background: #1a1a1a;
 }
 
 MessageInfo {
     height: auto;
-    background: $surface;
-    color: $text-muted;
-    border: dashed $primary-darken-2;
+    background: #0a0a0a;
+    color: #808080;
+    border: dashed #333333;
     text-style: italic;
 }
-
 
 Throbber {
     layer: overlay;
@@ -55,4 +57,4 @@ Throbber {
     &.-busy {
         visibility: visible;
     }    
-} 
+}

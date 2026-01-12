@@ -88,7 +88,16 @@ class ChatApp(App):
         self.max_tokens = None
         self.temperature = 0.1
         self.verbose = True
+        self._chat_scroll_view = None
 
+    @property
+    def chat_view(self):
+        if self._chat_scroll_view is None:
+            self._chat_scroll_view = self.query_one("#chat-view")
+        
+        return self._chat_scroll_view
+        
+    
     def compose(self) -> ComposeResult:
 
         yield Header()
@@ -106,24 +115,29 @@ class ChatApp(App):
         content = text
         self.history.append({"role": role, "content": content})
 
-    def on_input_submitted(self, event: Input.Submitted) -> None:
-        message = event.value
-        if message:
+    async def post_user_message(self, message: str):
+            self.current_user_message = message
             new_message = ChatMessage("user", 
                                       message, 
                                       verbose=False,
                                       classes="message message-user")
 
-            event.input.value = ""
-            chat_view = self.query_one("#chat-view")
-            chat_view.mount(new_message)
+            # chat_view = self.query_one("#chat-view")
+            await self.chat_view.mount(new_message)
             new_message.scroll_visible()
-            
-            self.post_agent_response(message)
         
+    async def on_input_submitted(self, event: Input.Submitted) -> None:
+        message = event.value
+        if message:
+            await self.post_user_message(message)
+            event.input.value = ""
+
+            await asyncio.sleep(0)
+            self.post_agent_response(message)
+            
     def _prepare_messages(self) -> str:
         messages = apply_chat_template(
-            self.processor, self.model.config, self.history, num_images=len(self.images), num_audios=len(self.audio)
+            self.processor, self.model.config, self.history[-6:], num_images=len(self.images), num_audios=len(self.audio)
         )
         return messages
         
@@ -149,23 +163,24 @@ class ChatApp(App):
         elif event.status == "error":
             self.throbber.set_class(False, "-busy")
     
-    @work
-    async def stream_markdown(self, messages: list) -> None:
-        response_full = ""
+    async def create_agent_response(self) -> ChatMessage:
         new_message = ChatMessage("assistant", "", 
                                   verbose=self.verbose,
                                   classes="message")
         chat_view = self.query_one("#chat-view")
         chat_view.mount(new_message)
-
-        stream = Markdown.get_stream(new_message.markdown)
+        return new_message
+        
+    async def stream_markdown(self, messages: list, agent_message: ChatMessage) -> None:
+        response_full = ""
+        stream = Markdown.get_stream(agent_message.markdown)
 
         try:
             async for response in self._generate_response(messages):
                 response_text = response.text
                 await stream.write(response_text)
                 response_full += response_text
-                new_message.scroll_visible()
+                agent_message.scroll_visible()
         finally:
             await stream.stop()
 
@@ -176,14 +191,17 @@ class ChatApp(App):
             generation_tps=response.generation_tps,
             peak_memory=response.peak_memory
         )
-        new_message.add_message_info(message_info)
+
+        agent_message.add_message_info(message_info)
         self.add_to_history("assistant", response_full)
         
-    def post_agent_response(self, prompt: str) -> None:
+    @work
+    async def post_agent_response(self, prompt: str) -> None:
         self.post_message(ModelStatus(status="loading"))
         self.add_to_history("user", prompt)
         messages = self._prepare_messages()
-        self.stream_markdown(messages)
+        agent_message = await self.create_agent_response()
+        await self.stream_markdown(messages, agent_message)
         # Debug: Delay "ready" status so throbber stays visible for testing
         self.set_timer(1.0, lambda: self.post_message(ModelStatus(status="ready")), name="delay_ready")
     
